@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LocalDebuggerCommandArguments>-timeout  12 -reduceclauses 5000 -valdh 0 c:\temp\try.cnf</LocalDebuggerCommandArguments>
+    <RemoteDebuggerCommandArguments>-timeout  12 -reduceclauses 5000 -valdh 0 c:\temp\try.cnf</RemoteDebuggerCommandArguments>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LocalDebuggerCommandArguments>-v 1 test\sat\bmc-ibm-12.cnf</LocalDebuggerCommandArguments>
+    <RemoteDebuggerCommandArguments>-v 1 test\sat\bmc-ibm-12.cnf</RemoteDebuggerCommandArguments>
+  </PropertyGroup>
+</Project>
