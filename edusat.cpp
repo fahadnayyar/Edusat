@@ -27,11 +27,11 @@ static void skipWhitespace(ifstream& in, char&c) {
 		c = in.get();
 }
 
-static int parseInt(ifstream& in) {
+static int parseInt(ifstream& in, char &c) {
 	int     val = 0;
 	bool    neg = false;
-	char c;
-	skipWhitespace(in, c);
+	// char c;
+	// skipWhitespace(in, c);
 	if (c == '-') neg = true, c = in.get();
 	if (c < '0' || c > '9') cout << c, Abort("Unexpected char in input", 1);
 	while (c >= '0' && c <= '9')
@@ -40,11 +40,14 @@ static int parseInt(ifstream& in) {
 	return neg ? -val : val;
 }
 
+
 void Solver::read_cnf(ifstream& in) {
 	int i;
 	unsigned int vars, clauses, unary = 0;
 	set<Lit> s;
 	Clause c;
+	char d;
+	bool flag = false;
 
 
 	while (in.peek() == 'c') skipLine(in);
@@ -61,7 +64,26 @@ void Solver::read_cnf(ifstream& in) {
 	initialize();
 
 	while (in.good() && in.peek() != EOF) {
-		i = parseInt(in);
+		// i = parseInt(in);
+		skipWhitespace(in, d);
+		
+		if(in.peek() == EOF) {flag=true;};		
+		
+		if(flag == false)
+		{
+			i = parseInt(in, d);
+		}else
+		{ //cout << d << endl; 
+			// i = (int)d;
+			if(d == '0') {
+				// Abort("Clause Line did not ended with zero. ", 1);
+			 	// break; 
+			 	i = 0;
+			 }else{
+			 	break;
+			 }
+			// i = 0; 
+		}
 		if (i == 0) {
 			c.cl().resize(s.size());
 			copy(s.begin(), s.end(), c.cl().begin());
@@ -95,6 +117,9 @@ void Solver::read_cnf(ifstream& in) {
 		i = v2l(i);		
 		if (ValDecHeuristic == VAL_DEC_HEURISTIC::LITSCORE) bumpLitScore(i);
 		s.insert(i);
+		if(flag == true){
+			break;
+		}
 	}	
 	if (VarDecHeuristic == VAR_DEC_HEURISTIC::MINISAT) reset_iterators();
 	cout << "Read " << cnf_size() << " clauses in " << cpuTime() - begin_time << " secs." << endl << "Solving..." << endl;
@@ -339,9 +364,9 @@ SolverState Solver::BCP() {
 	if (verbose_now()) cout << "BCP" << endl;
 	if (verbose_now()) cout << "qhead = " << qhead << " trail-size = " << trail.size() << endl;
 	while (qhead < trail.size()) { 
-		Lit NegatedLit = negate(trail[qhead++]);
+		Lit NegatedLit = negate_(trail[qhead++]);
 		Assert(lit_state(NegatedLit) == LitState::L_UNSAT);
-		if (verbose_now()) cout << "propagating " << l2rl(negate(NegatedLit)) << endl;
+		if (verbose_now()) cout << "propagating " << l2rl(negate_(NegatedLit)) << endl;
 		vector<int> new_watch_list; // The original watch list minus those clauses that changed a watch. The order is maintained. 
 		int new_watch_list_idx = watches[NegatedLit].size() - 1; // Since we are traversing the watch_list backwards, this index goes down.
 		new_watch_list.resize(watches[NegatedLit].size());
@@ -457,7 +482,7 @@ int Solver::analyze(const Clause conflicting) {
 	}	while (resolve_num > 0);
 	for (clause_it it = new_clause.cl().begin(); it != new_clause.cl().end(); ++it) 
 		marked[l2v(*it)] = false;
-	Lit Negated_u = negate(u);
+	Lit Negated_u = negate_(u);
 	new_clause.cl().push_back(Negated_u);		
 	if (VarDecHeuristic == VAR_DEC_HEURISTIC::MINISAT) 
 		m_var_inc *= 1 / var_decay; // increasing importance of participating variables.
